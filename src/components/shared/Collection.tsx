@@ -16,7 +16,6 @@ import { IImage } from "@/lib/database/models/image.model";
 import { formUrlQuery } from "@/lib/utils";
 
 import { Button } from "../ui/button";
-
 import { Search } from "./search";
 
 export const Collection = ({
@@ -33,59 +32,58 @@ export const Collection = ({
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  // PAGINATION HANDLER
   const onPageChange = (action: string) => {
     const pageValue = action === "next" ? Number(page) + 1 : Number(page) - 1;
-
     const newUrl = formUrlQuery({
-      searchParams: searchParams, // ✅ pass as URLSearchParams object
+      searchParams,
       key: "page",
-      value: String(pageValue), // ✅ or pageValue.toString()
+      value: String(pageValue),
     });
-
     router.push(newUrl, { scroll: false });
   };
 
   return (
     <>
-      <div className="collection-heading">
-        <h2 className="h2-bold text-dark-600">Recent Edits</h2>
+      <div className="flex items-center justify-between mb-6 px-4 sm:px-0">
+        <h2 className="text-3xl font-bold text-white drop-shadow-md">
+          Recent Edits
+        </h2>
         {hasSearch && <Search />}
       </div>
 
       {images.length > 0 ? (
-        <ul className="collection-list">
+        <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {images.map((image) => (
-            <Card image={image} key={String(image._id)} /> // ✅ Safe cast
+            <Card image={image} key={String(image._id)} />
           ))}
         </ul>
       ) : (
-        <div className="collection-empty">
-          <p className="p-20-semibold">Empty List</p>
+        <div className="text-center text-white/80 text-xl mt-10">
+          Empty List
         </div>
       )}
 
       {totalPages > 1 && (
         <Pagination className="mt-10">
-          <PaginationContent className="flex w-full">
+          <PaginationContent className="flex w-full items-center justify-center gap-6">
             <Button
               disabled={Number(page) <= 1}
-              className="collection-btn"
               onClick={() => onPageChange("prev")}
+              className="bg-white/10 text-white hover:bg-white/20 transition rounded-full px-6 py-2 backdrop-blur-md border border-white/20"
             >
-              <PaginationPrevious className="hover:bg-transparent hover:text-white" />
+              <PaginationPrevious />
             </Button>
 
-            <p className="flex-center p-16-medium w-fit flex-1">
+            <p className="text-white text-lg font-medium">
               {page} / {totalPages}
             </p>
 
             <Button
-              className="button w-32 bg-purple-gradient bg-cover text-white"
-              onClick={() => onPageChange("next")}
               disabled={Number(page) >= totalPages}
+              onClick={() => onPageChange("next")}
+              className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-6 py-2 rounded-full shadow-lg transition hover:brightness-110"
             >
-              <PaginationNext className="hover:bg-transparent hover:text-white" />
+              <PaginationNext />
             </Button>
           </PaginationContent>
         </Pagination>
@@ -96,8 +94,8 @@ export const Collection = ({
 
 const Card = ({ image }: { image: IImage }) => {
   return (
-    <li>
-      <Link href={`/transformations/${image._id}`} className="collection-card">
+    <li className="rounded-xl bg-white/5 border border-white/10 shadow-lg backdrop-blur-md p-3 hover:scale-[1.02] transition">
+      <Link href={`/transformations/${image._id}`}>
         <CldImage
           src={image.publicId}
           alt={image.title}
@@ -105,20 +103,19 @@ const Card = ({ image }: { image: IImage }) => {
           height={image.height}
           {...image.config}
           loading="lazy"
-          className="h-52 w-full rounded-[10px] object-cover"
+          className="rounded-lg h-52 w-full object-cover mb-4"
           sizes="(max-width: 767px) 100vw, (max-width: 1279px) 50vw, 33vw"
         />
-        <div className="flex-between">
-          <p className="p-20-semibold mr-3 line-clamp-1 text-dark-600">
-            {image.title}
-          </p>
+
+        <div className="flex justify-between items-center text-white">
+          <p className="text-lg font-semibold truncate">{image.title}</p>
           <Image
             src={`/assets/icons/${
               transformationTypes[
-                image.transformationType as TransformationTypeKey
+                image.transformationType as keyof typeof transformationTypes
               ].icon
             }`}
-            alt={image.title}
+            alt={image.transformationType}
             width={24}
             height={24}
           />

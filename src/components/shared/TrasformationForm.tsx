@@ -13,15 +13,7 @@ import {
 } from "@/components/ui/select";
 
 import { Button } from "@/components/ui/button";
-import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
+import { Form, FormField, FormItem, FormLabel } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import {
   aspectRatioOptions,
@@ -77,13 +69,11 @@ const TransformationForm = ({
         }
       : defaultValues;
 
-  // 1. Define your form.
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: initialValues,
   });
 
-  // 2. Define a submit handler.
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsSubmitting(true);
 
@@ -189,11 +179,9 @@ const TransformationForm = ({
 
   const onTransformHandler = async () => {
     setIsTransforming(true);
-
     setTransformationConfig(
       deepMergeObjects(newTransformation, transformationConfig)
     );
-
     setNewTransformation(null);
 
     startTransition(async () => {
@@ -209,14 +197,24 @@ const TransformationForm = ({
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+      <form
+        onSubmit={form.handleSubmit(onSubmit)}
+        className="space-y-10 p-8 pt-10 rounded-2xl border border-white/10 bg-white/5 backdrop-blur-lg shadow-2xl text-white"
+      >
         {creditBalance < Math.abs(creditFee) && <InsufficientCreditsModal />}
+
         <CustomField
           control={form.control}
           name="title"
           formLabel="Image Title"
-          className="w-full"
-          render={({ field }) => <Input {...field} className="input-field" />}
+          className="w-full text-white/80 text-sm font-medium"
+          render={({ field }) => (
+            <Input
+              {...field}
+              placeholder="Enter title"
+              className="bg-white/10 border border-white/20 backdrop-blur-md text-white placeholder-white/60 rounded-xl px-4 py-2 focus:ring-2 focus:ring-purple-500"
+            />
+          )}
         />
 
         {type === "fill" && (
@@ -224,7 +222,7 @@ const TransformationForm = ({
             control={form.control}
             name="aspectRatio"
             formLabel="Aspect Ratio"
-            className="w-full"
+            className="w-full text-white/80 text-sm font-medium"
             render={({ field }) => (
               <Select
                 onValueChange={(value) =>
@@ -232,12 +230,12 @@ const TransformationForm = ({
                 }
                 value={field.value}
               >
-                <SelectTrigger className="select-field">
+                <SelectTrigger className="bg-white/10 border border-white/20 backdrop-blur-md text-white rounded-xl px-4 py-2 focus:ring-2 focus:ring-purple-500">
                   <SelectValue placeholder="Select size" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="bg-[#1c1c1f] text-white">
                   {Object.keys(aspectRatioOptions).map((key) => (
-                    <SelectItem key={key} value={key} className="select-item">
+                    <SelectItem key={key} value={key}>
                       {aspectRatioOptions[key as AspectRatioKey].label}
                     </SelectItem>
                   ))}
@@ -248,18 +246,19 @@ const TransformationForm = ({
         )}
 
         {(type === "remove" || type === "recolor") && (
-          <div className="prompt-field">
+          <div className="grid gap-4">
             <CustomField
               control={form.control}
               name="prompt"
               formLabel={
                 type === "remove" ? "Object to remove" : "Object to recolor"
               }
-              className="w-full"
+              className="w-full text-white/80 text-sm font-medium"
               render={({ field }) => (
                 <Input
                   value={field.value}
-                  className="input-field"
+                  placeholder="e.g. hat, sunglasses"
+                  className="bg-white/10 border border-white/20 backdrop-blur-md text-white placeholder-white/60 rounded-xl px-4 py-2 focus:ring-2 focus:ring-purple-500"
                   onChange={(e) =>
                     onInputChangeHandler(
                       "prompt",
@@ -277,11 +276,12 @@ const TransformationForm = ({
                 control={form.control}
                 name="color"
                 formLabel="Replacement Color"
-                className="w-full"
+                className="w-full text-white/80 text-sm font-medium"
                 render={({ field }) => (
                   <Input
                     value={field.value}
-                    className="input-field"
+                    placeholder="e.g. red, green"
+                    className="bg-white/10 border border-white/20 backdrop-blur-md text-white placeholder-white/60 rounded-xl px-4 py-2 focus:ring-2 focus:ring-purple-500"
                     onChange={(e) =>
                       onInputChangeHandler(
                         "color",
@@ -297,7 +297,7 @@ const TransformationForm = ({
           </div>
         )}
 
-        <div className="media-uploader-field">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start bg-white/5 border border-white/10 rounded-xl p-6 mt-4 backdrop-blur-md shadow-inner">
           <CustomField
             control={form.control}
             name="publicId"
@@ -323,10 +323,10 @@ const TransformationForm = ({
           />
         </div>
 
-        <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-4 pt-2">
           <Button
             type="button"
-            className="submit-button capitalize"
+            className="w-full rounded-full bg-gradient-to-r from-purple-500 to-pink-500 text-white font-semibold shadow-md hover:opacity-90 transition"
             disabled={isTransforming || newTransformation === null}
             onClick={onTransformHandler}
           >
@@ -334,7 +334,7 @@ const TransformationForm = ({
           </Button>
           <Button
             type="submit"
-            className="submit-button capitalize"
+            className="w-full rounded-full bg-white/10 backdrop-blur-sm text-white font-semibold shadow hover:bg-white/20 transition"
             disabled={isSubmitting}
           >
             {isSubmitting ? "Submitting..." : "Save Image"}

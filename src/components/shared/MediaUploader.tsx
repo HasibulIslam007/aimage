@@ -62,34 +62,39 @@ const MediaUploader = ({
       onError={onUploadErrorHandler}
     >
       {({ open }) => (
-        <div className="flex flex-col gap-4">
-          <h3 className="h3-bold text-dark-600">Original</h3>
+        <div className="flex flex-col gap-4 bg-white/5 backdrop-blur-lg border border-white/10 p-4 rounded-xl shadow-md">
+          <h3 className="text-lg font-semibold text-white drop-shadow-sm">
+            Original
+          </h3>
 
           {publicId ? (
-            <>
-              <div className="cursor-pointer overflow-hidden rounded-[10px]">
-                <CldImage
-                  width={getImageSize(type, image, "width")}
-                  height={getImageSize(type, image, "height")}
-                  src={publicId}
-                  alt="image"
-                  sizes={"(max-width: 767px) 100vw, 50vw"}
-                  placeholder={dataUrl as PlaceholderValue}
-                  className="media-uploader_cldImage"
-                />
-              </div>
-            </>
+            <div className="cursor-pointer overflow-hidden rounded-xl border border-white/20 shadow-lg">
+              <CldImage
+                width={getImageSize(type, image, "width")}
+                height={getImageSize(type, image, "height")}
+                src={publicId}
+                alt="Uploaded image"
+                sizes={"(max-width: 767px) 100vw, 50vw"}
+                placeholder={dataUrl as PlaceholderValue}
+                className="w-full h-auto object-cover"
+              />
+            </div>
           ) : (
-            <div className="media-uploader_cta" onClick={() => open()}>
-              <div className="media-uploader_cta-image">
+            <div
+              onClick={() => open()}
+              className="flex flex-col items-center justify-center gap-3 bg-white/10 backdrop-blur-md border border-white/20 rounded-xl p-6 cursor-pointer hover:bg-white/20 transition"
+            >
+              <div className="p-3 bg-white/20 rounded-full">
                 <Image
                   src="/assets/icons/add.svg"
                   alt="Add Image"
-                  width={24}
-                  height={24}
+                  width={28}
+                  height={28}
                 />
               </div>
-              <p className="p-14-medium">Click here to upload image</p>
+              <p className="text-white text-sm font-medium text-center">
+                Click here to upload image
+              </p>
             </div>
           )}
         </div>

@@ -4,9 +4,9 @@ import { Toaster } from "@/components/ui/toaster";
 
 const layout = ({ children }: { children: React.ReactNode }) => {
   return (
-    <main className="flex min-h-screen w-full flex-col lg:flex-row bg-background">
+    <main className="flex min-h-screen pt-10 w-full flex-col lg:flex-row bg-background">
       {/* Sidebar only visible on large screens */}
-      <div className="hidden lg:flex">
+      <div className="hidden lg:flex md:hiddden">
         <Sidebar />
       </div>
 
