@@ -28,11 +28,11 @@ const UserSchema = new Schema({
   },
   planId: {
     type: Number,
-    default: 1,
+    default: 1, // Free plan
   },
   creditBalance: {
     type: Number,
-    default: 10,
+    default: 10, // Initial credits
   },
 });
 

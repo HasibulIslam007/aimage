@@ -6,6 +6,17 @@ import { twMerge } from "tailwind-merge";
 
 import { aspectRatioOptions } from "../../constants";
 
+type FormUrlQueryParams = {
+  searchParams: URLSearchParams;
+  key: string;
+  value: string;
+};
+
+type RemoveUrlQueryParams = {
+  searchParams: URLSearchParams;
+  keysToRemove: string[];
+};
+
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
@@ -70,7 +81,7 @@ export function removeKeysFromQuery({
   searchParams,
   keysToRemove,
 }: RemoveUrlQueryParams) {
-  const currentUrl = qs.parse(searchParams);
+  const currentUrl = qs.parse(searchParams.toString());
 
   keysToRemove.forEach((key) => {
     delete currentUrl[key];

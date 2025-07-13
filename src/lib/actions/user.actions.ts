@@ -6,15 +6,52 @@ import User from "../database/models/user.model";
 import { connectToDatabase } from "../database/mongoose";
 import { handleError } from "../utils";
 
+type CreateUserParams = {
+  clerkId: string;
+  email: string;
+  username: string;
+  firstName: string;
+  lastName: string;
+  photo: string;
+};
+
+type UpdateUserParams = {
+  firstName: string;
+  lastName: string;
+  username: string;
+  photo: string;
+};
+
 // CREATE
 export async function createUser(user: CreateUserParams) {
   try {
     await connectToDatabase();
 
-    const newUser = await User.create(user);
+    // Check if user already exists
+    const existingUser = await User.findOne({
+      $or: [
+        { clerkId: user.clerkId },
+        { email: user.email },
+        { username: user.username },
+      ],
+    });
 
+    if (existingUser) {
+      console.log("User already exists:", existingUser);
+      return JSON.parse(JSON.stringify(existingUser));
+    }
+
+    console.log("Creating new user with data:", user);
+    const newUser = await User.create({
+      ...user,
+      planId: 1, // Default free plan
+      creditBalance: 10, // Initial credits
+    });
+
+    console.log("Created new user:", newUser);
     return JSON.parse(JSON.stringify(newUser));
   } catch (error) {
+    console.error("Error in createUser:", error);
     handleError(error);
   }
 }
@@ -44,7 +81,7 @@ export async function updateUser(clerkId: string, user: UpdateUserParams) {
     });
 
     if (!updatedUser) throw new Error("User update failed");
-    
+
     return JSON.parse(JSON.stringify(updatedUser));
   } catch (error) {
     handleError(error);
@@ -80,11 +117,11 @@ export async function updateCredits(userId: string, creditFee: number) {
 
     const updatedUserCredits = await User.findOneAndUpdate(
       { _id: userId },
-      { $inc: { creditBalance: creditFee }},
+      { $inc: { creditBalance: creditFee } },
       { new: true }
-    )
+    );
 
-    if(!updatedUserCredits) throw new Error("User credits update failed");
+    if (!updatedUserCredits) throw new Error("User credits update failed");
 
     return JSON.parse(JSON.stringify(updatedUserCredits));
   } catch (error) {

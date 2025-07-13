@@ -3,7 +3,7 @@ import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 const isPublicRoute = createRouteMatcher(["/sign-in(.*)"]);
 
 export default clerkMiddleware(async (auth, req) => {
-  publicRoutes: ["/src/app/api/webhooks/clerk/route.ts"];
+  publicRoutes: ["/src/app/api/webhooks/clerk"];
 });
 
 export const config = {

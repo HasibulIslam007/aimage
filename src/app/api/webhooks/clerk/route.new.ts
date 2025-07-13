@@ -57,8 +57,6 @@ export async function POST(req: Request) {
           await connectToDatabase();
           console.log("✅ Database connected");
 
-          console.log("Raw webhook data:", JSON.stringify(data, null, 2));
-
           const userData = {
             clerkId: data.id,
             email: data.email_addresses?.[0]?.email_address,
@@ -66,8 +64,8 @@ export async function POST(req: Request) {
             firstName: data.first_name || "",
             lastName: data.last_name || "",
             photo:
-              data.profile_image_url ||
               data.image_url ||
+              data.profile_image_url ||
               "https://example.com/default-avatar.png",
           };
 
@@ -94,32 +92,6 @@ export async function POST(req: Request) {
           return NextResponse.json({ success: true, user: newUser });
         } catch (error) {
           console.error("❌ Error creating user:", error);
-          throw error;
-        }
-      }
-
-      // Handle user.deleted event
-      if (type === "user.deleted") {
-        console.log("🗑️ Deleting user...");
-
-        try {
-          await connectToDatabase();
-          console.log("✅ Database connected");
-
-          if (!data.id) {
-            throw new Error("No user ID provided in deletion webhook");
-          }
-
-          console.log("🔍 Deleting user with Clerk ID:", data.id);
-          const deletedUser = await deleteUser(data.id);
-          console.log(
-            "✅ User deleted from MongoDB:",
-            JSON.stringify(deletedUser, null, 2)
-          );
-
-          return NextResponse.json({ success: true, user: deletedUser });
-        } catch (error) {
-          console.error("❌ Error deleting user:", error);
           throw error;
         }
       }
