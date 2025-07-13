@@ -20,6 +20,8 @@ export const connectToDatabase = async () => {
   const mongoUrl = process.env.MONGODB_URL;
   if (!mongoUrl) throw new Error("Missing MONGODB_URL");
 
+  console.log("Connecting to MongoDB with:", mongoUrl);
+
   cached.promise =
     cached.promise ||
     mongoose.connect(mongoUrl, {
@@ -28,6 +30,9 @@ export const connectToDatabase = async () => {
     });
 
   cached.conn = await cached.promise;
+
+  const dbName = cached.conn.connection.db?.databaseName ?? "unknown";
+  console.log("✅ Connected to DB:", dbName);
 
   return cached.conn;
 };

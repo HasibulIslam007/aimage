@@ -27,6 +27,9 @@ export async function createUser(user: CreateUserParams) {
   try {
     await connectToDatabase();
 
+    // 🔍 DEBUG: Log the actual database name being used
+    console.log("📌 User model is using DB:", (User.db as any)?.databaseName);
+
     // Check if user already exists
     const existingUser = await User.findOne({
       $or: [
