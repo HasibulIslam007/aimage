@@ -1,5 +1,6 @@
 import MobileNav from "@/components/shared/MobileNav";
 import Sidebar from "@/components/shared/Sidebar";
+import { Toaster } from "@/components/ui/toaster";
 
 const layout = ({ children }: { children: React.ReactNode }) => {
   return (
@@ -18,6 +19,7 @@ const layout = ({ children }: { children: React.ReactNode }) => {
       <div className="flex-1 pt-16 lg:pt-0 overflow-auto">
         <div className="wrapper">{children}</div>
       </div>
+      <Toaster />
     </main>
   );
 };
