@@ -6,134 +6,120 @@ import { NextResponse } from "next/server";
 import { Webhook } from "svix";
 
 import { createUser, deleteUser, updateUser } from "@/lib/actions/user.actions";
-import { connectToDatabase } from "@/lib/database/mongoose";
 
-// Create a new temporary file with the new webhook handler
 export async function POST(req: Request) {
-  try {
-    console.log("🔔 Webhook endpoint hit");
+  // You can find this in the Clerk Dashboard -> Webhooks -> choose the webhook
+  const WEBHOOK_SECRET = process.env.WEBHOOK_SECRET;
 
-    const WEBHOOK_SECRET = process.env.WEBHOOK_SECRET;
-    if (!WEBHOOK_SECRET) {
-      console.error("❌ Missing WEBHOOK_SECRET");
-      throw new Error("Missing WEBHOOK_SECRET");
-    }
-
-    const headerPayload = headers();
-    const svix_id = headerPayload.get("svix-id");
-    const svix_timestamp = headerPayload.get("svix-timestamp");
-    const svix_signature = headerPayload.get("svix-signature");
-
-    if (!svix_id || !svix_timestamp || !svix_signature) {
-      console.error("❌ Missing Svix headers");
-      return new Response("Missing Svix headers", { status: 400 });
-    }
-
-    // Get and parse request body
-    const payload = await req.json();
-    console.log(
-      "📦 Received webhook payload:",
-      JSON.stringify(payload, null, 2)
-    );
-
-    const body = JSON.stringify(payload);
-    const wh = new Webhook(WEBHOOK_SECRET);
-
-    try {
-      const evt = wh.verify(body, {
-        "svix-id": svix_id,
-        "svix-timestamp": svix_timestamp,
-        "svix-signature": svix_signature,
-      }) as WebhookEvent;
-
-      const { type, data } = evt;
-      console.log("📝 Event type:", type);
-
-      // Handle user.created event
-      if (type === "user.created") {
-        console.log("👤 Creating new user...");
-
-        try {
-          await connectToDatabase();
-          console.log("✅ Database connected");
-
-          console.log("Raw webhook data:", JSON.stringify(data, null, 2));
-
-          const userData = {
-            clerkId: data.id,
-            email: data.email_addresses?.[0]?.email_address,
-            username: data.username || `user_${data.id.slice(-6)}`,
-            firstName: data.first_name || "",
-            lastName: data.last_name || "",
-            photo:
-              data.profile_image_url ||
-              data.image_url ||
-              "https://example.com/default-avatar.png",
-          };
-
-          console.log(
-            "📊 Creating user with data:",
-            JSON.stringify(userData, null, 2)
-          );
-
-          const newUser = await createUser(userData);
-          console.log(
-            "✅ User created in MongoDB:",
-            JSON.stringify(newUser, null, 2)
-          );
-
-          if (newUser) {
-            await clerkClient.users.updateUserMetadata(data.id, {
-              publicMetadata: {
-                userId: newUser._id,
-              },
-            });
-            console.log("✅ Updated Clerk metadata");
-          }
-
-          return NextResponse.json({ success: true, user: newUser });
-        } catch (error) {
-          console.error("❌ Error creating user:", error);
-          throw error;
-        }
-      }
-
-      // Handle user.deleted event
-      if (type === "user.deleted") {
-        console.log("🗑️ Deleting user...");
-
-        try {
-          await connectToDatabase();
-          console.log("✅ Database connected");
-
-          if (!data.id) {
-            throw new Error("No user ID provided in deletion webhook");
-          }
-
-          console.log("🔍 Deleting user with Clerk ID:", data.id);
-          const deletedUser = await deleteUser(data.id);
-          console.log(
-            "✅ User deleted from MongoDB:",
-            JSON.stringify(deletedUser, null, 2)
-          );
-
-          return NextResponse.json({ success: true, user: deletedUser });
-        } catch (error) {
-          console.error("❌ Error deleting user:", error);
-          throw error;
-        }
-      }
-
-      return NextResponse.json({ success: true, message: "Webhook processed" });
-    } catch (err) {
-      console.error("❌ Error verifying webhook:", err);
-      return new Response("Error verifying webhook", { status: 400 });
-    }
-  } catch (error) {
-    console.error("❌ Webhook error:", error);
-    return new Response(
-      JSON.stringify({ error: "Internal Server Error", details: error }),
-      { status: 500 }
+  if (!WEBHOOK_SECRET) {
+    throw new Error(
+      "Please add WEBHOOK_SECRET from Clerk Dashboard to .env or .env.local"
     );
   }
+
+  // Get the headers
+  const headerPayload = headers();
+  const svix_id = headerPayload.get("svix-id");
+  const svix_timestamp = headerPayload.get("svix-timestamp");
+  const svix_signature = headerPayload.get("svix-signature");
+
+  // If there are no headers, error out
+  if (!svix_id || !svix_timestamp || !svix_signature) {
+    return new Response("Error occured -- no svix headers", {
+      status: 400,
+    });
+  }
+
+  // Get the body
+  const payload = await req.json();
+  const body = JSON.stringify(payload);
+
+  // Create a new Svix instance with your secret.
+  const wh = new Webhook(WEBHOOK_SECRET);
+
+  let evt: WebhookEvent;
+
+  // Verify the payload with the headers
+  try {
+    evt = wh.verify(body, {
+      "svix-id": svix_id,
+      "svix-timestamp": svix_timestamp,
+      "svix-signature": svix_signature,
+    }) as WebhookEvent;
+  } catch (err) {
+    console.error("Error verifying webhook:", err);
+    return new Response("Error occured", {
+      status: 400,
+    });
+  }
+
+  // Get the ID and type
+  const { id } = evt.data;
+  const eventType = evt.type;
+
+  // CREATE
+  if (eventType === "user.created") {
+    const { id, email_addresses, image_url, first_name, last_name, username } =
+      evt.data;
+
+    const user = {
+      clerkId: id,
+      email: email_addresses[0].email_address,
+      username: username || "",
+      firstName: first_name || "",
+      lastName: last_name || "",
+      photo: image_url,
+    };
+
+    const newUser = await createUser(user);
+
+    // Set public metadata
+    if (newUser && typeof newUser === "object" && "_id" in newUser) {
+      await (
+        await clerkClient()
+      ).users.updateUserMetadata(id, {
+        publicMetadata: {
+          userId: newUser._id,
+        },
+      });
+    }
+
+    return NextResponse.json({ message: "OK", user: newUser });
+  }
+
+  // UPDATE
+  if (eventType === "user.updated") {
+    const { id, image_url, first_name, last_name, username } = evt.data;
+
+    const user = {
+      firstName: first_name || "",
+      lastName: last_name || "",
+      username: username || "",
+      photo: image_url,
+    };
+
+    const updatedUser = await updateUser(id, user);
+
+    return NextResponse.json({ message: "OK", user: updatedUser });
+  }
+
+  // DELETE
+  if (eventType === "user.deleted") {
+    const { id } = evt.data;
+
+    if (!id) {
+      return new Response("Error occured -- no user id", {
+        status: 400,
+      });
+    }
+
+    const deletedUser = await deleteUser(id);
+
+    return NextResponse.json({ message: "OK", user: deletedUser });
+  }
+
+  console.log(`Webhook with and ID of ${id} and type of ${eventType}`);
+  console.log("Webhook body:", body);
+
+  return new Response("", { status: 200 });
 }

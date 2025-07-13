@@ -106,33 +106,10 @@ export async function getAllImages({
   try {
     await connectToDatabase();
 
-    cloudinary.config({
-      cloud_name: process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME,
-      api_key: process.env.CLOUDINARY_API_KEY,
-      api_secret: process.env.CLOUDINARY_API_SECRET,
-      secure: true,
-    });
-
-    let expression = "folder=aimage";
+    let query: any = {};
 
     if (searchQuery) {
-      expression += ` AND ${searchQuery}`;
-    }
-
-    const { resources } = await cloudinary.search
-      .expression(expression)
-      .execute();
-
-    const resourceIds = resources.map((resource: any) => resource.public_id);
-
-    let query = {};
-
-    if (searchQuery) {
-      query = {
-        publicId: {
-          $in: resourceIds,
-        },
-      };
+      query.title = { $regex: searchQuery, $options: "i" };
     }
 
     const skipAmount = (Number(page) - 1) * limit;
