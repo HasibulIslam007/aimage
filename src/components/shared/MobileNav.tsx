@@ -1,7 +1,7 @@
 "use client";
 
 import { navLinks } from "../../../constants";
-import { SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
+import { SignedIn, SignedOut, UserButton, useClerk } from "@clerk/nextjs";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -12,6 +12,7 @@ import { cn } from "@/lib/utils";
 const MobileNav = () => {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
+  const { signOut } = useClerk(); // 👈 For logout
 
   useEffect(() => {
     setOpen(false);
@@ -29,7 +30,7 @@ const MobileNav = () => {
           ☰
         </button>
 
-        {/* Login Button */}
+        {/* Login Button (if signed out) */}
         <SignedOut>
           <Button
             className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-6 py-2 rounded-full text-sm font-semibold"
@@ -38,6 +39,11 @@ const MobileNav = () => {
             <Link href="/sign-in">Login</Link>
           </Button>
         </SignedOut>
+
+        {/* User Avatar + Logout (if signed in) */}
+        <SignedIn>
+          <UserButton afterSignOutUrl="/" />
+        </SignedIn>
       </header>
 
       {/* === Floating Vertical Menu === */}
@@ -75,6 +81,16 @@ const MobileNav = () => {
               </Link>
             );
           })}
+
+          {/* === Logout Button === */}
+          <SignedIn>
+            <button
+              onClick={() => signOut()}
+              className="w-56 px-4 py-2 text-sm font-medium text-white bg-red-500 hover:bg-red-600 transition rounded-xl shadow-lg"
+            >
+              Logout
+            </button>
+          </SignedIn>
         </div>
       </div>
 

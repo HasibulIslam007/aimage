@@ -15,9 +15,10 @@ const Home = async ({ searchParams }: SearchParamProps) => {
       <section className="w-full min-h-screen px-6 py-10 md:px-16 flex flex-col lg:flex-row items-center justify-between overflow-hidden">
         <div className="z-10 max-w-2xl text-center lg:text-left">
           <h1 className="text-4xl md:text-5xl font-extrabold leading-tight text-white drop-shadow-lg">
-            Unleash your <span className="text-purple-400">Creativity</span>{" "}
+            Transform your <span className="text-purple-400">imagination</span>{" "}
             <br />
-            with the power of <span className="text-pink-500">AImage</span>
+            into stunning visuals with{" "}
+            <span className="text-pink-500">AImage</span>
           </h1>
           <p className="mt-6 text-lg text-white/80 leading-relaxed">
             Create production-quality visual assets for your projects with
@@ -34,7 +35,7 @@ const Home = async ({ searchParams }: SearchParamProps) => {
         <div className="relative mt-12 lg:mt-0 max-w-lg z-10">
           <img
             src="https://res.cloudinary.com/demo/image/upload/v1691234567/wizard-ai.png"
-            alt="AI wizard"
+            alt=""
             className="w-full object-contain drop-shadow-2xl"
           />
         </div>

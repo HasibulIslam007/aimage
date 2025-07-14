@@ -1,7 +1,7 @@
 "use client";
 
 import { navLinks } from "@/../constants";
-import { SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
+import { SignedIn, SignedOut, SignOutButton } from "@clerk/nextjs";
 import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
@@ -35,14 +35,46 @@ const Sidebar = () => {
 
       {/* === Sidebar Arc Menu === */}
       <div className="fixed left-0 top-1/2 -translate-y-1/2 z-50">
-        <div className="relative w-[260px] h-[360px]">
-          {/* Toggle Button */}
+        <div className="relative w-[260px] h-[400px]">
+          {/* ☰ Toggle Button */}
           <button
             onClick={() => setOpen(!open)}
             className="absolute left-[85px] top-[140px] z-50 flex items-center justify-center w-14 h-14 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full shadow-xl text-white text-xl transition hover:scale-110"
           >
             ☰
           </button>
+
+          {/* Auth Buttons Below Toggle */}
+          <div className="absolute top-[200px] left-[50px] flex flex-col items-center gap-2 z-40 transition-all duration-500">
+            <SignedOut>
+              <Button
+                asChild
+                className={cn(
+                  "bg-gradient-to-r from-purple-500 to-pink-500 text-white px-5 py-2 rounded-full text-sm shadow-md",
+                  open
+                    ? "opacity-100 scale-100"
+                    : "opacity-0 scale-95 pointer-events-none"
+                )}
+              >
+                <Link href="/sign-in">Login</Link>
+              </Button>
+            </SignedOut>
+
+            <SignedIn>
+              <SignOutButton>
+                <Button
+                  className={cn(
+                    "bg-red-500 hover:bg-red-600 text-white px-10 py-2 rounded-full text-sm shadow-md",
+                    open
+                      ? "opacity-100 scale-100"
+                      : "opacity-0 scale-100 pointer-events-none"
+                  )}
+                >
+                  Logout
+                </Button>
+              </SignOutButton>
+            </SignedIn>
+          </div>
 
           {/* Arc Items */}
           {navLinks.map((link, index) => {
@@ -54,7 +86,7 @@ const Sidebar = () => {
             const y = radius * Math.sin(rad);
             const isActive = pathname === link.route;
 
-            // Determine tooltip direction
+            // Tooltip position
             let labelPosition = "right";
             if (index === 0) labelPosition = "top";
             else if (index === navLinks.length - 1) labelPosition = "bottom";
@@ -92,7 +124,7 @@ const Sidebar = () => {
                     className="z-10"
                   />
 
-                  {/* Smart Tooltip */}
+                  {/* Tooltip */}
                   <span
                     className={cn(
                       "absolute px-3 py-1 text-sm font-medium text-white whitespace-nowrap opacity-0 group-hover/icon:opacity-100 transition-all duration-300 pointer-events-none",
@@ -119,18 +151,6 @@ const Sidebar = () => {
               </div>
             );
           })}
-        </div>
-
-        {/* === Auth Buttons === */}
-        <div className="mt-12 flex justify-center">
-          <SignedOut>
-            <Button
-              className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-4 py-2 rounded-full"
-              asChild
-            >
-              <Link href="/sign-in">Login</Link>
-            </Button>
-          </SignedOut>
         </div>
       </div>
     </>
