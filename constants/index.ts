@@ -29,11 +29,7 @@ export const navLinks = [
     route: "/transformations/add/removeBackground",
     icon: "/assets/icons/camera.svg",
   },
-  {
-    label: "Video Generator",
-    route: "/transformations/add/removeBackground",
-    icon: "/assets/icons/camera.svg",
-  },
+
   {
     label: "Profile",
     route: "/profile",
